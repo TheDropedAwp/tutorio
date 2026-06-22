@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from datetime import date
 from hashlib import sha256
 import os
@@ -15,15 +16,10 @@ from sqlalchemy.orm import Session
 from .database import Base, engine, get_db
 from .models import Booking, CalendarSlot, Listing, Message, Notification, Review, ScheduleSlot, User
 
-
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI(title="Tutorio")
 root_dir = Path(__file__).resolve().parent.parent
 static_dir = root_dir / "static"
 upload_dir = static_dir / "uploads"
 upload_dir.mkdir(parents=True, exist_ok=True)
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@tutorio-school.ru")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
@@ -37,6 +33,9 @@ AUTO_SEED_ON_STARTUP = os.getenv("AUTO_SEED_ON_STARTUP", "true").lower() in {
 
 def ensure_schema() -> None:
     """Tiny dev migration helper for the local SQLite fallback."""
+    if engine.dialect.name != "sqlite":
+        return
+
     inspector = inspect(engine)
     message_columns = {column["name"] for column in inspector.get_columns("messages")}
     user_columns = {column["name"] for column in inspector.get_columns("users")}
@@ -79,9 +78,20 @@ def hash_password(password: str) -> str:
     return sha256(password.encode("utf-8")).hexdigest()
 
 
-ensure_schema()
-if AUTO_SEED_ON_STARTUP:
-    ensure_admin()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    ensure_schema()
+    if AUTO_SEED_ON_STARTUP:
+        try:
+            ensure_admin()
+        except Exception as exc:
+            print(f"Admin seed skipped: {exc}")
+    yield
+
+
+app = FastAPI(title="Tutorio", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 def notify(db: Session, user_id: int, title: str, body: str = "") -> None:
