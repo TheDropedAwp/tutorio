@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tutorio - репетиторы рядом</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="toast hidden" id="toast"></div>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <button class="brand" data-route="catalog">Tutorio</button>
+      <nav class="topnav">
+        <button class="nav-btn" data-route="catalog">Каталог</button>
+        <button class="nav-btn auth-only" data-route="chats">Чаты</button>
+        <button class="nav-btn tutor-only" data-route="manage-listings">Мои объявления</button>
+        <button class="nav-btn tutor-only" data-route="calendar">Календарь</button>
+        <button class="nav-btn admin-only hidden" data-route="admin">Админ</button>
+      </nav>
+      <div class="top-actions">
+        <button class="bell auth-only" id="notificationButton" title="Уведомления">0</button>
+        <button class="avatar-button auth-only" id="profileAvatarButton" title="Профиль"></button>
+        <button class="ghost guest-only" id="loginButton">Войти</button>
+        <button class="primary guest-only" id="registerButton">Регистрация</button>
+        <button class="ghost auth-only" id="logoutButton">Выйти</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="search-band route" id="catalogRoute">
+      <div class="search-panel">
+        <div>
+          <h1>Репетиторы для школьников и студентов</h1>
+          <p>Каталог преподавателей с объявлениями, отзывами, календарем записи и личными сообщениями.</p>
+        </div>
+        <form class="search-box" id="searchForm">
+          <input id="searchInput" placeholder="Предмет, экзамен или имя">
+          <input id="cityInput" placeholder="Город">
+          <button class="primary" type="submit">Найти</button>
+        </form>
+      </div>
+      <div class="layout">
+        <aside class="filters">
+          <h2>Фильтры</h2>
+          <label>Предмет
+            <select id="subjectFilter">
+              <option value="">Все предметы</option>
+              <option>Математика</option>
+              <option>Английский</option>
+              <option>Русский язык</option>
+              <option>Физика</option>
+              <option>Информатика</option>
+            </select>
+          </label>
+          <div class="hint">Выберите предмет и город, чтобы сузить выдачу.</div>
+        </aside>
+        <section class="content">
+          <div class="section-title">
+            <h2>Объявления репетиторов</h2>
+            <span id="listingCount">0 найдено</span>
+          </div>
+          <div class="cards" id="listingCards"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="workspace route hidden" id="listingRoute">
+      <button class="back-link" data-route="catalog">Назад к каталогу</button>
+      <div id="listingDetails"></div>
+    </section>
+
+    <section class="workspace route hidden" id="publicProfileRoute">
+      <button class="back-link" data-route="catalog">Назад</button>
+      <div id="publicProfile"></div>
+    </section>
+
+    <section class="workspace route hidden" id="profileRoute">
+      <div class="section-title">
+        <h2>Профиль</h2>
+        <span id="roleBadge"></span>
+      </div>
+      <div class="profile-layout">
+        <section class="panel profile-preview" id="profilePreview"></section>
+        <form class="panel hidden" id="profileForm">
+          <div class="panel-head">
+            <h3>Редактирование профиля</h3>
+            <button class="ghost icon-btn" type="button" id="cancelProfileEdit">x</button>
+          </div>
+          <label>Аватар
+            <div class="upload-row">
+              <input name="avatar_url" placeholder="Ссылка на фото">
+              <input type="file" id="avatarUpload" accept="image/*">
+            </div>
+          </label>
+          <input name="name" placeholder="Имя">
+          <input name="city" placeholder="Город">
+          <textarea name="bio" placeholder="О себе"></textarea>
+          <button class="primary">Сохранить профиль</button>
+        </form>
+        <div class="panel profile-bookings">
+          <h3>Мои заявки</h3>
+          <div class="list" id="bookingList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace route hidden" id="manageListingsRoute">
+      <div class="section-title">
+        <h2>Мои объявления</h2>
+        <span>Создание, редактирование и удаление</span>
+      </div>
+      <div class="manage-layout">
+        <form class="panel" id="listingForm">
+          <h3 id="listingFormTitle">Новое объявление</h3>
+          <input type="hidden" name="id">
+          <input name="title" placeholder="Заголовок">
+          <select name="subject" required>
+            <option value="">Выберите предмет</option>
+            <option>Математика</option>
+            <option>Английский</option>
+            <option>Русский язык</option>
+            <option>Физика</option>
+            <option>Информатика</option>
+            <option>Химия</option>
+            <option>Биология</option>
+            <option>История</option>
+            <option>Обществознание</option>
+          </select>
+          <input name="price" type="number" placeholder="Цена за час">
+          <input name="format" placeholder="Онлайн, у ученика, у репетитора">
+          <input name="level" placeholder="Уровень">
+          <label>Фото объявления
+            <div class="upload-row">
+              <input name="image_url" placeholder="Ссылка на изображение">
+              <input type="file" id="listingUpload" accept="image/*">
+            </div>
+          </label>
+          <textarea name="description" placeholder="Описание"></textarea>
+          <button class="primary">Сохранить объявление</button>
+          <button class="ghost" type="button" id="resetListingForm">Очистить</button>
+        </form>
+        <div class="panel">
+          <h3>Опубликовано</h3>
+          <div class="list" id="myListings"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace route hidden" id="calendarRoute">
+      <div class="section-title">
+        <h2>Календарь записи</h2>
+        <span>Выставляйте доступные даты и время</span>
+      </div>
+      <div class="calendar-layout">
+        <form class="panel" id="calendarForm">
+          <h3>Добавить окно</h3>
+          <input name="slot_date" type="date" required>
+          <input name="starts_at" type="time" required>
+          <input name="ends_at" type="time" required>
+          <button class="primary">Добавить</button>
+        </form>
+        <div class="panel">
+          <h3>Свободные окна</h3>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace route hidden" id="chatsRoute">
+      <div class="section-title">
+        <h2>Чаты</h2>
+        <span>Диалоги сохраняются по пользователям</span>
+      </div>
+      <div class="chat-layout">
+        <aside class="panel dialogs" id="dialogList"></aside>
+        <section class="panel chat-panel">
+          <div class="chat-head" id="chatHead">Выберите диалог</div>
+          <div class="chat-messages" id="chatMessages"></div>
+          <form class="chat-form" id="messageForm">
+            <input type="hidden" name="recipient_id">
+            <input type="hidden" name="listing_id">
+            <input name="body" placeholder="Сообщение">
+            <input type="file" id="messageUpload" accept="image/*">
+            <button class="primary">Отправить</button>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <section class="workspace route hidden" id="adminRoute">
+      <div class="section-title">
+        <h2>Администрирование</h2>
+        <span>Пользователи, объявления и отзывы</span>
+      </div>
+      <div class="admin-grid">
+        <section class="panel">
+          <h3>Пользователи</h3>
+          <div class="list" id="adminUsers"></div>
+        </section>
+        <section class="panel">
+          <h3>Объявления</h3>
+          <div class="list" id="adminListings"></div>
+        </section>
+        <section class="panel">
+          <h3>Отзывы</h3>
+          <div class="list" id="adminReviews"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="authDialog">
+    <form class="modal" id="authForm">
+      <button class="close" data-close-dialog="authDialog" type="button">x</button>
+      <h2 id="authTitle">Вход</h2>
+      <div class="form-error hidden" id="authError"></div>
+      <input name="name" class="register-field" placeholder="Имя">
+      <input name="city" class="register-field" placeholder="Город">
+      <select name="role" class="register-field">
+        <option value="student">Ученик</option>
+        <option value="tutor">Репетитор</option>
+      </select>
+      <input name="email" type="email" placeholder="Email" required>
+      <input name="password" type="password" minlength="6" placeholder="Пароль" required>
+      <button class="primary" id="authSubmit">Войти</button>
+    </form>
+  </dialog>
+
+  <dialog id="bookingDialog">
+    <form class="modal" id="bookingForm">
+      <button class="close" data-close-dialog="bookingDialog" type="button">x</button>
+      <h2>Записаться на занятие</h2>
+      <div class="form-error hidden" id="bookingError"></div>
+      <input type="hidden" name="listing_id">
+      <div class="slot-picker" id="slotPicker"></div>
+      <input name="requested_date" type="date" required>
+      <input name="requested_time" type="time" required>
+      <textarea name="note" placeholder="Комментарий для репетитора"></textarea>
+      <button class="primary">Отправить заявку</button>
+    </form>
+  </dialog>
+
+  <dialog id="reviewDialog">
+    <form class="modal" id="reviewForm">
+      <button class="close" data-close-dialog="reviewDialog" type="button">x</button>
+      <h2>Оставить отзыв</h2>
+      <div class="form-error hidden" id="reviewError"></div>
+      <input type="hidden" name="tutor_id">
+      <select name="rating">
+        <option value="5">5 - отлично</option>
+        <option value="4">4 - хорошо</option>
+        <option value="3">3 - нормально</option>
+        <option value="2">2 - есть проблемы</option>
+        <option value="1">1 - плохо</option>
+      </select>
+      <textarea name="body" placeholder="Расскажите, как прошло занятие"></textarea>
+      <button class="primary">Опубликовать</button>
+    </form>
+  </dialog>
+
+  <dialog id="notificationsDialog">
+    <div class="modal">
+      <button class="close" id="closeNotifications" type="button">x</button>
+      <h2>Уведомления</h2>
+      <div class="list" id="notificationList"></div>
+    </div>
+  </dialog>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
